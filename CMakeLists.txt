@@ -5,7 +5,8 @@ list(APPEND CMAKE_PREFIX_PATH "C:\\Packages\\SDL2_image-devel-2.8.2-VC;C:\\Packa
 
 add_executable(
 	${PROJECT_NAME}
-	main.cpp
+	src/main.cpp
+	classes/Input/Input.cpp
 )
 
 find_package(SDL2 REQUIRED)
@@ -14,6 +15,8 @@ find_package(SDL2_ttf REQUIRED)
 
 target_include_directories(
 	${PROJECT_NAME}
+	PUBLIC include/
+	PUBLIC classes/Input
 	PRIVATE ${SDL2_INCLUDE_DIRS}
 	PRIVATE ${SDL2_IMAGE_INCLUDE_DIRS}
 	PRIVATE ${SDL2_TTF_INCLUDE_DIRS}
