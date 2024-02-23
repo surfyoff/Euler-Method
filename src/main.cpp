@@ -39,6 +39,12 @@ int main(int argc, char* argv[])
 		done = processEvent(window);
 	}
 
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+
+	SDL_Quit();
+
+
 	return EXIT_SUCCESS;
 }
 
