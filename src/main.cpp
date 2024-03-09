@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
 	);
 
-	TTF_Font *font = TTF_OpenFont("res/arial.ttf", 28);
+	TTF_Font *font = TTF_OpenFont("res/courier.ttf", 20);
 
 	SDL_Surface* surface = IMG_Load("res/GUI.png");
 	if (surface == NULL)
@@ -79,32 +79,24 @@ int main(int argc, char *argv[])
 		[4] = Velocity Power
 	*/
 
+	SDL_Event e = {};
+
 	Input data[5] = {
-		Input(renderer, font, 478, 112, 98, 18),
-		Input(renderer, font, 478, 139, 98, 18),
-		Input(renderer, font, 478, 166, 98, 18),
-		Input(renderer, font, 478, 193, 98, 18),
-		Input(renderer, font, 478, 220, 98, 18)
+		Input(renderer, font, 536, 80, 98, 18),
+		Input(renderer, font, 536, 107, 98, 18),
+		Input(renderer, font, 536, 134, 98, 18),
+		Input(renderer, font, 536, 161, 98, 18),
+		Input(renderer, font, 536, 188, 98, 18)
 	};
 
 
-	SDL_Event e;
+	
 	bool done = false;
 	while (!done)
 	{
 		done = processEvent(window, e, data);
-		
-		
 
-		do_render(renderer, font);
-		
-		
-		SDL_RenderPresent(renderer);
-	}
-
-	for (int i = 0; i < 5; i++)
-	{
-		data[i].terminate();
+		do_render(renderer, font, data);
 	}
 
 	TTF_CloseFont(font);
@@ -137,13 +129,18 @@ bool processEvent(SDL_Window* window, SDL_Event &e, Input data[5])
 			done = 1;
 			break;
 		case SDL_KEYDOWN:
-			switch (e.key.keysym.sym)
+			if (e.key.keysym.sym == SDLK_ESCAPE)
 			{
-			case SDLK_ESCAPE:
 				done = 1;
-				break;
 			}
-		
+			else if (e.key.keysym.sym == SDLK_p)
+			{
+				for (int i = 0; i < 5; i++)
+				{
+					cout << "Input text number " << i << ": " << data[i].getInputText() << endl;
+				}
+			}
+		break;
 		}
 		
 		for (int i = 0; i < 5; i++)
@@ -155,7 +152,7 @@ bool processEvent(SDL_Window* window, SDL_Event &e, Input data[5])
 	return done;
 }
 
-void do_render(SDL_Renderer* renderer, TTF_Font* font)
+void do_render(SDL_Renderer* renderer, TTF_Font* font, Input data[5])
 {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
@@ -165,5 +162,14 @@ void do_render(SDL_Renderer* renderer, TTF_Font* font)
 
 	SDL_RenderCopy(renderer, GUItex, NULL, &GUIrect);
 
+	for (int i = 0; i < 5; i++)
+	{
+		if (data[i].getState() || data[i].Full())
+		{
+			data[i].render();
+		}
+	}
+
+	SDL_RenderPresent(renderer);
 }
 

@@ -1,11 +1,20 @@
 #include "Input.h"
 
-Input::Input(SDL_Renderer* renderer, TTF_Font* font, int x, int y, int w, int h) : renderer(renderer), font(font), rect({ x, y, w, h }), isActive(false) 
+Input::Input(SDL_Renderer* renderer, TTF_Font* font, int x, int y, int w, int h) :
+    renderer(renderer),
+    font(font), rect({ x, y, w, h }),
+    isActive(false),
+    textRect({ x, y, 0, h }),
+    isFilled(false)
 {
     textTexture = nullptr;
+    width = 0;
+    height = 0;
+
+    SDL_StartTextInput();
 }
 
-void Input::handleEvent(SDL_Event& e)
+void Input::handleEvent(SDL_Event &e)
 {
     switch (e.type)
     {
@@ -29,15 +38,24 @@ void Input::handleEvent(SDL_Event& e)
             switch (e.key.keysym.sym)
             {
             case SDLK_BACKSPACE:
-                if (!inputText.empty()) inputText.pop_back();
-                
+                if (!inputText.empty())
+                {
+                    inputText.pop_back();
+                }
+                break;
             case SDLK_RETURN:
-                cout << "Input Text: " << inputText << endl;
-            default:
-                inputText += e.key.keysym.sym;
+                isActive = false;
+                break;
             }
+        }
+        break;
+    case SDL_TEXTINPUT:
+        if (isActive)
+        {
+            inputText += e.text.text;
             renderText();
         }
+    break;
     }
 }
 
@@ -50,15 +68,22 @@ void Input::render()
     SDL_RenderDrawRect(renderer, &rect);
 
     if (isActive) {
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+        SDL_SetRenderDrawColor(renderer, 50, 50, 50, 255);
     }
     else {
-        SDL_SetRenderDrawColor(renderer, 100, 100, 100, 255);
+        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     }
     SDL_RenderFillRect(renderer, &rect);
 
+    SDL_SetRenderDrawColor(renderer, 78, 154, 6, 255);
+
     if (!inputText.empty() && textTexture != nullptr) {
-        SDL_RenderCopy(renderer, textTexture, NULL, &rect);
+        SDL_RenderCopy(renderer, textTexture, NULL, &textRect);
+        isFilled = true;
+    }
+    else if (inputText.empty())
+    {
+        isFilled = false;
     }
 }
 
@@ -69,17 +94,29 @@ string Input::getInputText()
 
 void Input::renderText() 
 {
-    if (textTexture != nullptr) {
+    if (textTexture) {
         SDL_DestroyTexture(textTexture);
+        textTexture = nullptr;
     }
     SDL_Surface* textSurface = TTF_RenderText_Solid(font, inputText.c_str(), { 255, 255, 255, 255 });
     textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    textRect.w = textSurface->w;
+    textRect.h = textSurface->h;
     SDL_FreeSurface(textSurface);
+    textSurface = nullptr;
+
+    SDL_QueryTexture(textTexture, nullptr, nullptr, &textRect.w, &textRect.h);
 }
 
-void Input::terminate()
+Input::~Input()
 {
+    SDL_StopTextInput();
     SDL_DestroyTexture(textTexture);
+}
+
+bool Input::Full()
+{
+    return isFilled;
 }
 
 double Input::getDouble()
@@ -90,4 +127,9 @@ double Input::getDouble()
 int Input::getInt()
 {
     return stoi(inputText);
+}
+
+bool Input::getState()
+{
+    return isActive;
 }
