@@ -11,7 +11,6 @@ Input::Input(SDL_Renderer* renderer, TTF_Font* font, int x, int y, int w, int h)
     width = 0;
     height = 0;
 
-    SDL_StartTextInput();
 }
 
 void Input::handleEvent(SDL_Event &e)
@@ -110,7 +109,6 @@ void Input::renderText()
 
 Input::~Input()
 {
-    SDL_StopTextInput();
     SDL_DestroyTexture(textTexture);
 }
 

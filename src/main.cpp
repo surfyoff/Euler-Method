@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 		Input(renderer, font, 536, 188, 98, 18)
 	};
 
-
+	SDL_StartTextInput();
 	
 	bool done = false;
 	while (!done)
@@ -98,6 +98,8 @@ int main(int argc, char *argv[])
 
 		do_render(renderer, font, data);
 	}
+
+	SDL_StopTextInput();
 
 	TTF_CloseFont(font);
 	SDL_DestroyRenderer(renderer);
