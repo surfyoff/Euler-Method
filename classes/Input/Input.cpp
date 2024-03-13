@@ -5,7 +5,8 @@ Input::Input(SDL_Renderer* renderer, TTF_Font* font, int x, int y, int w, int h)
     font(font), rect({ x, y, w, h }),
     isActive(false),
     textRect({ x, y, 0, h }),
-    isFilled(false)
+    isFilled(false),
+    modified(false)
 {
     textTexture = nullptr;
     width = 0;
@@ -17,44 +18,49 @@ void Input::handleEvent(SDL_Event &e)
 {
     switch (e.type)
     {
-    case SDL_MOUSEBUTTONDOWN:
-        int mouseX, mouseY;
-        SDL_GetMouseState(&mouseX, &mouseY);
+        case SDL_MOUSEBUTTONDOWN:
+            int mouseX, mouseY;
+            SDL_GetMouseState(&mouseX, &mouseY);
 
-        if (mouseX >= rect.x && mouseX <= rect.x + rect.w &&
-            mouseY >= rect.y && mouseY <= rect.y + rect.h)
-        {
-            isActive = true;
-        }
-        else
-        {
-            isActive = false;
-        }
-        break;
-    case SDL_KEYDOWN:
-        if (isActive)
-        {
-            switch (e.key.keysym.sym)
+            if (mouseX >= rect.x && mouseX <= rect.x + rect.w &&
+                mouseY >= rect.y && mouseY <= rect.y + rect.h)
             {
-            case SDLK_BACKSPACE:
-                if (!inputText.empty())
-                {
-                    inputText.pop_back();
-                }
-                break;
-            case SDLK_RETURN:
-                isActive = false;
-                break;
+                isActive = true;
             }
-        }
+            else
+            {
+                isActive = false;
+            }
         break;
-    case SDL_TEXTINPUT:
-        if (isActive)
-        {
-            inputText += e.text.text;
-            renderText();
-        }
-    break;
+        case SDL_KEYDOWN:
+            if (isActive)
+            {
+                switch (e.key.keysym.sym)
+                {
+                case SDLK_BACKSPACE:
+                    if (!inputText.empty())
+                    {
+                        inputText.pop_back();
+                        modified = true;
+                    }
+                    break;
+                case SDLK_RETURN:
+                    isActive = false;
+                    break;
+                }
+            }
+        break;
+        case SDL_TEXTINPUT:
+            if (isActive)
+            {
+                inputText += e.text.text;
+                renderText();
+                modified = true;
+            }
+        break;
+        default:
+            modified = false;
+        break;
     }
 }
 
@@ -97,7 +103,7 @@ void Input::renderText()
         SDL_DestroyTexture(textTexture);
         textTexture = nullptr;
     }
-    SDL_Surface* textSurface = TTF_RenderText_Solid(font, inputText.c_str(), { 255, 255, 255, 255 });
+    SDL_Surface* textSurface = TTF_RenderText_Solid_Wrapped(font, inputText.c_str(), { 255, 255, 255, 255 }, 98);
     textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
     textRect.w = textSurface->w;
     textRect.h = textSurface->h;
@@ -130,4 +136,9 @@ int Input::getInt()
 bool Input::getState()
 {
     return isActive;
+}
+
+bool Input::isModified()
+{
+    return modified;
 }

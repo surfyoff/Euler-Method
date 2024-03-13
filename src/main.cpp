@@ -13,15 +13,25 @@
 
 using namespace std;
 
-double A, B, initSpeed, timeStep;
-int n;
+double A = 1e10, B = 1e10, initSpeed = 1e10, timeStep = 1e10;
+int n = 0;
+
+double currentAcceleration, currentSpeed;
+double nextAcceleration, nextSpeed;
+
+bool done_processing = false;
+bool render = false;
+
+double Vel[103] = { 0 };
 
 SDL_Texture* GUItex = NULL;
+SDL_FPoint graph[104];
 
 int main(int argc, char *argv[])
 {
 	SDL_Window* window;
 	SDL_Renderer* renderer;
+
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
 	{
@@ -58,7 +68,7 @@ int main(int argc, char *argv[])
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
 	);
 
-	TTF_Font *font = TTF_OpenFont("res/courier.ttf", 20);
+	TTF_Font *font = TTF_OpenFont("res/courier.ttf", 14);
 
 	SDL_Surface* surface = IMG_Load("res/GUI.png");
 	if (surface == NULL)
@@ -72,9 +82,9 @@ int main(int argc, char *argv[])
 
 
 	/*
-		[0] = Initial Acceleration
-		[1] = Caracteristic Time
-		[2] = Initial Speed
+		[0] = initSpeed
+		[1] = A (Initial acceleration)
+		[2] = B (Time caracteristic)
 		[3] = Time Step
 		[4] = Velocity Power
 	*/
@@ -95,6 +105,21 @@ int main(int argc, char *argv[])
 	while (!done)
 	{
 		done = processEvent(window, e, data);
+
+		if (is_ready(data) && check_modif(data))
+		{
+			initSpeed = data[0].getDouble();			
+			A = data[1].getDouble();
+			B = data[2].getDouble();
+			timeStep = data[3].getDouble();
+			n = data[4].getInt();
+
+			if (!done_processing)
+			{
+				process_data(data);
+			}
+		}
+
 
 		do_render(renderer, font, data);
 	}
@@ -139,8 +164,27 @@ bool processEvent(SDL_Window* window, SDL_Event &e, Input data[5])
 			{
 				for (int i = 0; i < 5; i++)
 				{
-					cout << "Input text number " << i << ": " << data[i].getInputText() << endl;
+					cout << "Input text number " << i+1 << ": " << data[i].getDouble() << endl;
 				}
+			}
+			else if (e.key.keysym.sym == SDLK_n)
+			{
+				if (A != 1e10 && B != 1e10 && initSpeed != 1e10 && timeStep != 1e10 && n != 0)
+				{
+					cout << "Initial Acceleration: " << A << endl;
+					cout << "Caracteristic time: " << B << endl;
+					cout << "Initial Speed: " << initSpeed << endl;
+					cout << "Time Step: " << timeStep << endl;
+					cout << "Velocity power: " << n << endl;
+				}
+			}
+			else if (e.key.keysym.sym == SDLK_r)
+			{
+				render = true;
+			}
+			else if (e.key.keysym.sym == SDLK_s)
+			{
+				render = false;
 			}
 		break;
 		}
@@ -172,6 +216,72 @@ void do_render(SDL_Renderer* renderer, TTF_Font* font, Input data[5])
 		}
 	}
 
+	if (done_processing)
+	{
+		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+		graph[0] = { 10, 469 };
+		for (int i = 0; i < 103; i++)
+		{
+			graph[i + 1].x = 10 + 5 * i;
+			graph[i + 1].y = HEIGHT - 11 - Vel[i];
+		}
+
+		if (render)
+		{
+			SDL_RenderDrawLinesF(renderer, graph, 104);
+		}
+	}
+
 	SDL_RenderPresent(renderer);
 }
 
+void process_data(Input data[5])
+{
+	currentSpeed = initSpeed;
+	currentAcceleration = A - B * initSpeed;
+
+
+	for (int i = 0; i < 103; i++)
+	{
+		// Calculate the next Speed and Acceleration
+		nextSpeed = currentSpeed + currentAcceleration * timeStep;
+		nextAcceleration = A - B * nextSpeed;
+
+		Vel[i] = currentSpeed * 300;
+
+		cout << "Speed " << i << ": " << currentSpeed << endl;
+		cout << "Acceleration " << i << ": " << currentAcceleration << endl << endl;
+
+		// Update Speed and Acceleration values for the next iteration
+		currentSpeed = nextSpeed;
+		currentAcceleration = nextAcceleration;
+	}
+
+	done_processing = true;
+}
+
+bool is_ready(Input data[5])
+{
+	for (int i = 0; i < 5; i++)
+	{
+		if (!data[i].Full())
+		{
+			return false;
+		}
+	}
+
+	return true;
+}
+
+bool check_modif(Input data[5])
+{
+	for (int i = 0; i < 5; i++)
+	{
+		if (data[i].isModified())
+		{
+			return false;
+		}
+	}
+
+	return true;
+}

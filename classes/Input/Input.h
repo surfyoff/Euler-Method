@@ -20,6 +20,7 @@ private:
 	string inputText;
 	bool isActive;
 	bool isFilled;
+	bool modified;
 
 	void renderText();
 
@@ -37,6 +38,7 @@ public:
 	int getInt();
 	bool getState();
 	bool Full();
+	bool isModified();
 
 	~Input();
 
