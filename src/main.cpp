@@ -1,6 +1,5 @@
 #include <iostream>
 #include <string>
-#include <vector>
 
 #define SDL_MAIN_HANDLED
 
@@ -13,24 +12,11 @@
 
 using namespace std;
 
-double A = 1e10, B = 1e10, initSpeed = 1e10, timeStep = 1e10;
-int n = 0;
 
-double currentAcceleration, currentSpeed;
-double nextAcceleration, nextSpeed;
-
-bool done_processing = false;
-bool render = false;
-
-double Vel[103] = { 0 };
-
-SDL_Texture* GUItex = NULL;
-SDL_FPoint graph[104];
 
 int main(int argc, char *argv[])
 {
 	SDL_Window* window;
-	SDL_Renderer* renderer;
 
 
 	if (SDL_Init(SDL_INIT_VIDEO) != 0)
@@ -68,7 +54,7 @@ int main(int argc, char *argv[])
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
 	);
 
-	TTF_Font *font = TTF_OpenFont("res/courier.ttf", 14);
+	font = TTF_OpenFont("res/courier.ttf", 14);
 
 	SDL_Surface* surface = IMG_Load("res/GUI.png");
 	if (surface == NULL)
@@ -121,10 +107,26 @@ int main(int argc, char *argv[])
 		}
 
 
-		do_render(renderer, font, data);
+		do_render(renderer, data);
 	}
 
 	SDL_StopTextInput();
+
+	if (GUItex)
+	{
+		SDL_DestroyTexture(GUItex);
+		GUItex = nullptr;
+	}
+	if (x)
+	{
+		SDL_DestroyTexture(x);
+		x = nullptr;
+	}
+	if (y)
+	{
+		SDL_DestroyTexture(y);
+		y = nullptr;
+	}
 
 	TTF_CloseFont(font);
 	SDL_DestroyRenderer(renderer);
@@ -142,6 +144,7 @@ bool processEvent(SDL_Window* window, SDL_Event &e, Input data[5])
 {
 	bool done = false;
 
+
 	while (SDL_PollEvent(&e))
 	{
 		switch (e.type)
@@ -156,19 +159,18 @@ bool processEvent(SDL_Window* window, SDL_Event &e, Input data[5])
 			done = 1;
 			break;
 		case SDL_KEYDOWN:
-			if (e.key.keysym.sym == SDLK_ESCAPE)
+			switch (e.key.keysym.sym)
 			{
-				done = 1;
-			}
-			else if (e.key.keysym.sym == SDLK_p)
-			{
+			case SDLK_ESCAPE:
+				done = true;
+			break;
+			case SDLK_p:
 				for (int i = 0; i < 5; i++)
 				{
-					cout << "Input text number " << i+1 << ": " << data[i].getDouble() << endl;
+					cout << "Input text number " << i + 1 << ": " << data[i].getDouble() << endl;
 				}
-			}
-			else if (e.key.keysym.sym == SDLK_n)
-			{
+			break;
+			case SDLK_n:
 				if (A != 1e10 && B != 1e10 && initSpeed != 1e10 && timeStep != 1e10 && n != 0)
 				{
 					cout << "Initial Acceleration: " << A << endl;
@@ -177,14 +179,23 @@ bool processEvent(SDL_Window* window, SDL_Event &e, Input data[5])
 					cout << "Time Step: " << timeStep << endl;
 					cout << "Velocity power: " << n << endl;
 				}
-			}
-			else if (e.key.keysym.sym == SDLK_r)
-			{
+			break;
+			case SDLK_r:
 				render = true;
-			}
-			else if (e.key.keysym.sym == SDLK_s)
-			{
+			break;
+			case SDLK_s:
 				render = false;
+			break;
+			case SDLK_UP:
+				y_sens += 20;
+				cout << "Y sensibility: " << 30 / y_sens << " m/s" << endl;
+
+			break;
+			case SDLK_DOWN:
+				y_sens -= 20;
+				cout << "Y sensibility: " << 30 / y_sens << " m/s" << endl;
+
+			break;
 			}
 		break;
 		}
@@ -198,7 +209,7 @@ bool processEvent(SDL_Window* window, SDL_Event &e, Input data[5])
 	return done;
 }
 
-void do_render(SDL_Renderer* renderer, TTF_Font* font, Input data[5])
+void do_render(SDL_Renderer* renderer, Input data[5])
 {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
@@ -222,18 +233,51 @@ void do_render(SDL_Renderer* renderer, TTF_Font* font, Input data[5])
 		graph[0] = { 10, 469 };
 		for (int i = 0; i < 103; i++)
 		{
-			graph[i + 1].x = 10 + 5 * i;
-			graph[i + 1].y = HEIGHT - 11 - Vel[i];
+			graph[i + 1].x = 10 + x_sens * i;
+			graph[i + 1].y = HEIGHT - 11 - Vel[i] * y_sens;
 		}
 
 		if (render)
 		{
 			SDL_RenderDrawLinesF(renderer, graph, 104);
+
+
+			SDL_Color green = { 78, 154, 6, 255 };
+
+			string x_setting = to_string((float)timeStep);
+			x_setting.append(" s");
+
+			string y_setting = to_string((float)(30 / y_sens));
+			y_setting.append(" m/s");
+
+			SDL_Surface* surface = TTF_RenderText_Solid(font, x_setting.c_str(), green);
+			if (surface)
+			{
+				x = SDL_CreateTextureFromSurface(renderer, surface);
+				SDL_QueryTexture(x, nullptr, nullptr, &x_text_width, &x_text_height);
+
+				SDL_Rect x_rect = { 108, 128, x_text_width + 10, x_text_height };
+				SDL_RenderCopy(renderer, x, nullptr, &x_rect);
+			}
+			SDL_FreeSurface(surface);
+			surface = TTF_RenderText_Solid(font, y_setting.c_str(), green);
+			if (surface)
+			{
+				y = SDL_CreateTextureFromSurface(renderer, surface);
+				SDL_QueryTexture(x, nullptr, nullptr, &y_text_width, &y_text_height);
+
+				SDL_Rect y_rect = { 108, 144, y_text_width + 10, y_text_height };
+				SDL_RenderCopy(renderer, y, nullptr, &y_rect);
+			}
+			SDL_FreeSurface(surface);
+			surface = nullptr;
 		}
 	}
 
 	SDL_RenderPresent(renderer);
 }
+
+
 
 void process_data(Input data[5])
 {
@@ -247,7 +291,7 @@ void process_data(Input data[5])
 		nextSpeed = currentSpeed + currentAcceleration * timeStep;
 		nextAcceleration = A - B * nextSpeed;
 
-		Vel[i] = currentSpeed * 300;
+		Vel[i] = currentSpeed;
 
 		cout << "Speed " << i << ": " << currentSpeed << endl;
 		cout << "Acceleration " << i << ": " << currentAcceleration << endl << endl;

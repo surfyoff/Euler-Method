@@ -42,6 +42,7 @@ void Input::handleEvent(SDL_Event &e)
                     {
                         inputText.pop_back();
                         modified = true;
+                        
                     }
                     break;
                 case SDLK_RETURN:
