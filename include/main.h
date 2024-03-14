@@ -29,10 +29,11 @@ int x_text_width = 0, x_text_height = 0;
 int y_text_width = 0, y_text_height = 0;
 double x_sens = 6, y_sens = 300;
 
+bool start = false;
+
 bool processEvent(SDL_Window* window, SDL_Event &e, Input data[5]);
 
 void do_render(SDL_Renderer* renderer, Input data[5]);
-
 
 void process_data(Input data[5]);
 

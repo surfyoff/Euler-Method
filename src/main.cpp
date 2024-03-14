@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cmath>
 
 #define SDL_MAIN_HANDLED
 
@@ -181,7 +182,10 @@ bool processEvent(SDL_Window* window, SDL_Event &e, Input data[5])
 				}
 			break;
 			case SDLK_r:
-				render = true;
+				if (is_ready(data) && start)
+				{
+					render = true;
+				}
 			break;
 			case SDLK_s:
 				render = false;
@@ -196,6 +200,14 @@ bool processEvent(SDL_Window* window, SDL_Event &e, Input data[5])
 				cout << "Y sensibility: " << 30 / y_sens << " m/s" << endl;
 
 			break;
+			case SDLK_b:
+				if (!start)
+				{
+					start = true;
+				}
+				break;
+			default:
+				break;
 			}
 		break;
 		}
@@ -282,14 +294,14 @@ void do_render(SDL_Renderer* renderer, Input data[5])
 void process_data(Input data[5])
 {
 	currentSpeed = initSpeed;
-	currentAcceleration = A - B * initSpeed;
+	currentAcceleration = A - B * pow(initSpeed, n);
 
 
 	for (int i = 0; i < 103; i++)
 	{
 		// Calculate the next Speed and Acceleration
 		nextSpeed = currentSpeed + currentAcceleration * timeStep;
-		nextAcceleration = A - B * nextSpeed;
+		nextAcceleration = A - B * pow(nextSpeed, n);
 
 		Vel[i] = currentSpeed;
 
