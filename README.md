@@ -1,7 +1,7 @@
 # Euler Method Calculator
 
 ## Description
-Euler Method Calculator for first degree differential equations _(dy/dx) = f(y <sup>n</sup>)_ to use for physics implementations (making a method for every possible implementation is way too hard lol).
+Euler Method Calculator for differential equations of the form _**dv/dt + v<sup>n</sup>/τ = A**_ to use for dynamics studies in Newtonian mechanics.
 
 ## Set-up
 If you want to clone this repository to do whatever you like with the code or the executable, you have to take care of a couple of things:
