@@ -11,8 +11,9 @@ If you want to clone this repository to do whatever you like with the code or th
 ## Usage
 Once the executable is running, you have to know how to use the program:
 1. Fill all the input boxes with the appropriate data.
-2. Press `r` to render the results as a graph, or if you don't want to look at the graph, the calculations will be printed out in the console window.
-3. Press `s` to stop rendering the graph.
+2. Press `b` to begin the calculating process. Note that each time you modify the inputs, you have to press `b` again to re-initiate the calculating process.
+3. Press `r` to render the results as a graph, or if you don't want to look at the graph, the calculations will be printed out in the console window.
+4. Press `s` to stop rendering the graph.
 
 There are two additional commands, such as:
 + Pressing `p`, which just prints out the input texts as strings to the console window (used to check if the input is received well).
