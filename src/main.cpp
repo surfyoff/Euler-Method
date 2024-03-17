@@ -97,14 +97,19 @@ int main(int argc, char *argv[])
 		{
 			initSpeed = data[0].getDouble();			
 			A = data[1].getDouble();
-			B = data[2].getDouble();
+			B = 1 / data[2].getDouble();
 			timeStep = data[3].getDouble();
 			n = data[4].getInt();
 
-			if (!done_processing)
+
+			if (!done_processing && start)
 			{
 				process_data(data);
 			}
+		}
+		else
+		{
+			start = false;
 		}
 
 
@@ -204,6 +209,7 @@ bool processEvent(SDL_Window* window, SDL_Event &e, Input data[5])
 				if (!start)
 				{
 					start = true;
+					done_processing = false;
 				}
 				break;
 			default:
@@ -268,18 +274,22 @@ void do_render(SDL_Renderer* renderer, Input data[5])
 				x = SDL_CreateTextureFromSurface(renderer, surface);
 				SDL_QueryTexture(x, nullptr, nullptr, &x_text_width, &x_text_height);
 
-				SDL_Rect x_rect = { 108, 128, x_text_width + 10, x_text_height };
+				SDL_Rect x_rect = { 108, 128, x_text_width, x_text_height };
 				SDL_RenderCopy(renderer, x, nullptr, &x_rect);
+
+				SDL_DestroyTexture(x);
 			}
 			SDL_FreeSurface(surface);
 			surface = TTF_RenderText_Solid(font, y_setting.c_str(), green);
 			if (surface)
 			{
 				y = SDL_CreateTextureFromSurface(renderer, surface);
-				SDL_QueryTexture(x, nullptr, nullptr, &y_text_width, &y_text_height);
+				SDL_QueryTexture(y, nullptr, nullptr, &y_text_width, &y_text_height);
 
-				SDL_Rect y_rect = { 108, 144, y_text_width + 10, y_text_height };
+				SDL_Rect y_rect = { 108, 144, y_text_width, y_text_height };
 				SDL_RenderCopy(renderer, y, nullptr, &y_rect);
+
+				SDL_DestroyTexture(y);
 			}
 			SDL_FreeSurface(surface);
 			surface = nullptr;
@@ -312,6 +322,8 @@ void process_data(Input data[5])
 		currentSpeed = nextSpeed;
 		currentAcceleration = nextAcceleration;
 	}
+
+	cout << endl;
 
 	done_processing = true;
 }
