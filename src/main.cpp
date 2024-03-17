@@ -274,7 +274,7 @@ void do_render(SDL_Renderer* renderer, Input data[5])
 				x = SDL_CreateTextureFromSurface(renderer, surface);
 				SDL_QueryTexture(x, nullptr, nullptr, &x_text_width, &x_text_height);
 
-				SDL_Rect x_rect = { 108, 128, x_text_width, x_text_height };
+				SDL_Rect x_rect = { 158, 132, x_text_width, x_text_height };
 				SDL_RenderCopy(renderer, x, nullptr, &x_rect);
 
 				SDL_DestroyTexture(x);
@@ -286,7 +286,7 @@ void do_render(SDL_Renderer* renderer, Input data[5])
 				y = SDL_CreateTextureFromSurface(renderer, surface);
 				SDL_QueryTexture(y, nullptr, nullptr, &y_text_width, &y_text_height);
 
-				SDL_Rect y_rect = { 108, 144, y_text_width, y_text_height };
+				SDL_Rect y_rect = { 158, 149, y_text_width, y_text_height };
 				SDL_RenderCopy(renderer, y, nullptr, &y_rect);
 
 				SDL_DestroyTexture(y);
