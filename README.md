@@ -6,7 +6,7 @@ Euler Method Calculator for first degree differential equations _(dy/dx) = f(y <
 ## Set-up
 If you want to clone this repository to do whatever you like with the code or the executable, you have to take care of a couple of things:
 1. Make sure to have **SDL2**, **SDL2_image** and **SDL2_ttf** on your system, so that CMake knows how to handle the source's dependencies. You can put them wherever you want on your system, just make sure to change the contents of `CMakeLists.txt` accordingly (pls know what ur doing with cmake).
-2. Once all the CMake stuff is checked and the executable is compiled successfully, copy and paste `SDL2.dll`, `SDL2_umage.dll`, `SDL2_ttf.dll` and the `res` folder in the executable directory.
+2. Once CMake finds the SDL2 libraries and the executable is compiled successfully, copy and paste `SDL2.dll`, `SDL2_image.dll`, `SDL2_ttf.dll` and the `res/` folder in the executable directory.
 
 ## Usage
 Once the executable is running, you have to know how to use the program:
